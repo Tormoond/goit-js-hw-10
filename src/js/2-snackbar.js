@@ -1,44 +1,79 @@
-import iziToast from "izitoast";
-import "izitoast/dist/css/iziToast.min.css";
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
+import successIcon from '../img/success.svg';
+import errorIcon from '../img/error.svg';
 
-const form = document.querySelector('.form');
+const formElem = document.querySelector('.form');
+formElem.addEventListener('submit', onNotificationBtnSubmit);
 
-form.addEventListener('submit', function(event) {
-  event.preventDefault(); //Зупиняє стандартну подію submit
+function onNotificationBtnSubmit(event) {
+  event.preventDefault();
 
-  const delayInput = document.querySelector('input[name="delay"]');
-  const delay = parseInt(delayInput.value); // Затримка в мілісекундах
+  const delayMs = Number(formElem.delay.value);
+  const stateValue = formElem.state.value;
 
-  const stateInput = document.querySelector('input[name="state"]:checked');
-  const state = stateInput ? stateInput.value : null; // Стан: 'fulfilled' або 'rejected'
+  if (delayMs <= 0) {
+    iziToast.warning(getMessageObj('warning'));
+    formElem.reset();
+    return;
+  }
 
-  // Створення нового промісу
-  const promise = new Promise((resolve, reject) => {
-    if (state === 'fulfilled') {
-      setTimeout(() => resolve(delay), delay);
-    } else if (state === 'rejected') {
-      setTimeout(() => reject(delay), delay);
-    } else {
-      // Якщо не обрано жодного стану, проміс не створюємо
-      return;
-    }
+  const promise = makePromise({ delayMs, stateValue });
+  promise
+    .then(delayMs => iziToast.success(getMessageObj('success', delayMs)))
+    .catch(delayMs => iziToast.error(getMessageObj('error', delayMs)));
+
+  formElem.reset();
+}
+
+function makePromise({ delayMs, stateValue }) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (stateValue === 'fulfilled') {
+        resolve(delayMs);
+      } else {
+        reject(delayMs);
+      }
+    }, delayMs);
   });
+}
 
-  // Обробка результату промісу
-  promise.then(
-    (delay) => {
-      iziToast.success({
-        title: 'Success',
-        message: `✅ Fulfilled promise in ${delay}ms`,
-        timeout: 5000, // Показувати повідомлення 5 секунд
-      });
-    },
-    (delay) => {
-      iziToast.error({
+function getMessageObj(messageState, delayMs = 0) {
+  const commonSettings = {
+    theme: 'dark',
+    position: 'topRight',
+    messageColor: '#ffffff',
+  };
+  switch (messageState) {
+    case 'success':
+      return {
+        title: 'OK',
+        message: `Fulfilled promise in ${delayMs}ms`,
+        backgroundColor: '#59a10d',
+        iconUrl: successIcon,
+        ...commonSettings,
+      };
+    case 'error':
+      return {
         title: 'Error',
-        message: `❌ Rejected promise in ${delay}ms`,
-        timeout: 5000, // Показувати повідомлення 5 секунд
-      });
-    }
-  );
-});
+        message: `Rejected promise in ${delayMs}ms`,
+        backgroundColor: '#ef4040',
+        iconUrl: errorIcon,
+        ...commonSettings,
+      };
+    case 'warning':
+      return {
+        title: 'Caution',
+        message: 'Make choice more than 0',
+        backgroundColor: '#ffa000',
+        ...commonSettings,
+      };
+    default:
+      return {
+        title: 'Error',
+        message: 'Unknown problem',
+        backgroundColor: '#ef4040',
+        ...commonSettings,
+      };
+  }
+}

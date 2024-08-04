@@ -1,103 +1,92 @@
-// Імпортуємо flatpickr і iziToast.
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
+import errorIcon from '../img/error.svg';
 
-import flatpickr from "flatpickr";
-import iziToast from "izitoast";
-import "flatpickr/dist/flatpickr.min.css";
-import "izitoast/dist/css/iziToast.min.css"; 
-
-// Оголошуємо змінні для елементів DOM і функцій.
-
-
-const datetimePicker = document.getElementById('datetime-picker');
-const startBtn = document.getElementById('start-timer');
-const timerElements = {
-  days: document.querySelector('[data-days]'),
-  hours: document.querySelector('[data-hours]'),
-  minutes: document.querySelector('[data-minutes]'),
-  seconds: document.querySelector('[data-seconds]')
+const refs = {
+  timeInput: document.querySelector('#datetime-picker'),
+  startTimerBtn: document.querySelector('[data-start]'),
+  timer: document.querySelector('.timer'),
+  daysElem: document.querySelector('[data-days]'),
+  hoursElem: document.querySelector('[data-hours]'),
+  minutesElem: document.querySelector('[data-minutes]'),
+  secondsElem: document.querySelector('[data-seconds]'),
 };
 
-let countdownInterval;
-let selectedDate;
-// addLeadingZero форматує числа з менше ніж двох цифр, додаючи 0 спереду.
-function addLeadingZero(value) {
-  return String(value).padStart(2, '0');
-}
-// convertMs перетворює мілісекунди в дні, години, хвилини та секунди.
-function convertMs(ms) {
-  const second = 1000;
-  const minute = second * 60;
-  const hour = minute * 60;
-  const day = hour * 24;
+const errorMsgObj = {
+  title: 'Error',
+  titleColor: '#fff',
+  titleSize: '16px',
+  titleLineHeight: '1.5',
+  message: 'Please choose a date in the future',
+  messageColor: '#fff',
+  messageSize: '16px',
+  messageLineHeight: '1.5',
+  backgroundColor: '#ef4040',
+  position: 'topRight',
+  iconUrl: errorIcon,
+  theme: 'dark',
+};
 
-  const days = Math.floor(ms / day);
-  const hours = Math.floor((ms % day) / hour);
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
- 
+refs.startTimerBtn.disabled = true;
+let userSelectedDate = '';
 
-  return { days, hours, minutes, seconds};
-}
-// updateTimerUI оновлює інтерфейс таймера з використанням значень днів, годин, хвилин і секунд.
-function updateTimerUI(ms) {
-  const { days, hours, minutes, seconds} = convertMs(ms);
-  timerElements.days.textContent = addLeadingZero(days);
-  timerElements.hours.textContent = addLeadingZero(hours);
-  timerElements.minutes.textContent = addLeadingZero(minutes);
-  timerElements.seconds.textContent = addLeadingZero(seconds);
- 
-}
-// startTimer запускає таймер зворотного відліку до обраної дати, оновлюючи інтерфейс кожну секунду.
-function startTimer(targetDate) {
-  clearInterval(countdownInterval);
-
-  const targetTime = targetDate.getTime();
-
-  countdownInterval = setInterval(() => {
-    const now = new Date().getTime();
-    const distance = targetTime - now;
-
-    if (distance <= 0) {
-      clearInterval(countdownInterval);
-      updateTimerUI(0);
-      iziToast.success({
-        title: 'Timer Finished!',
-        message: 'The countdown has ended.'
-      });
-      datetimePicker.disabled = false;
-      startBtn.disabled = false;
-    } else {
-      updateTimerUI(distance);
-    }
-  }, 1000);
-}
-// flatpickr налаштовує поле вибору дати, обмежує вибір майбутніх дат і показує помилку, якщо користувач обрав минулу дату.
-flatpickr(datetimePicker, {
+const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    // Оновлення глобальної змінної selectedDate
+    const selectedTime = selectedDates[0];
+    const currentTime = Date.now();
 
-   selectedDate = selectedDates[0];
-
-    if (selectedDate < new Date()) {
-      iziToast.error({
-        title: 'Error!',
-        message: 'Please choose a future date.',
-        position: 'topCenter'
-      });
-      startBtn.disabled = true;
+    if (selectedTime < currentTime) {
+      refs.startTimerBtn.disabled = true;
+      refs.startTimerBtn.classList.remove('active-btn');
+      iziToast.error(errorMsgObj);
     } else {
-      startBtn.disabled = false;
+      userSelectedDate = selectedTime;
+      refs.startTimerBtn.classList.add('active-btn');
+      refs.startTimerBtn.disabled = false;
     }
-  }
-});
-// Обробник подій для кнопки startBtn запускає таймер, вимикає поля вводу і кнопку Start, оновлює інтерфейс таймера, і відображає повідомлення, коли таймер завершується.
-startBtn.addEventListener('click', () => {
-  
-  datetimePicker.disabled = true;
-  startBtn.disabled = true;
-  startTimer(selectedDate);
-});
+  },
+};
+
+flatpickr(refs.timeInput, options);
+
+refs.startTimerBtn.addEventListener('click', setTimerOnStartBtn);
+function setTimerOnStartBtn() {
+  refs.startTimerBtn.classList.remove('active-btn');
+  refs.startTimerBtn.disabled = true;
+  refs.timeInput.disabled = true;
+
+  const intervalId = setInterval(() => {
+    const leftDurationMs = userSelectedDate - Date.now();
+    const leftTime = convertMs(leftDurationMs);
+    refs.daysElem.textContent = addLeadingZero(leftTime.days);
+    refs.hoursElem.textContent = addLeadingZero(leftTime.hours);
+    refs.minutesElem.textContent = addLeadingZero(leftTime.minutes);
+    refs.secondsElem.textContent = addLeadingZero(leftTime.seconds);
+  }, 1000);
+
+  setTimeout(() => {
+    clearInterval(intervalId);
+    refs.timeInput.disabled = false;
+  }, userSelectedDate - Date.now());
+}
+
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  return { days, hours, minutes, seconds };
+}
+function addLeadingZero(value) {
+  return value.toString().padStart(2, '0');
+}
