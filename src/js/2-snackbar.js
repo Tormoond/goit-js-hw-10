@@ -1,7 +1,6 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import successIcon from '../img/success.svg';
-import errorIcon from '../img/error.svg';
+
 
 const formElem = document.querySelector('.form');
 formElem.addEventListener('submit', onNotificationBtnSubmit);
