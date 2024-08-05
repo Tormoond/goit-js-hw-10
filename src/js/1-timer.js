@@ -2,7 +2,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import errorIcon from '../img/error.svg';
+
 
 const refs = {
   timeInput: document.querySelector('#datetime-picker'),
