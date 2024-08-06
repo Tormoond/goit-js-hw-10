@@ -1,7 +1,15 @@
+/**
+  |============================
+  | include css partials with
+  | default @import url()
+  |============================
+*/
 @import url('./reset.css');
+@import url('./vite-promo.css');
+@import url('./header.css');
 
 :root {
-  font-family: 'Montserrat', sans-serif;
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -16,33 +24,132 @@
   -webkit-text-size-adjust: 100%;
 }
 
-body {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 1.5;
-  letter-spacing: 0.04em;
-  color: #2e2f42;
+.timer-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Відстань між інпутом і кнопкою */
+  margin-top: 20px;
 }
 
-.nav-link {
-  display: block;
-  margin: 20px;
-  width: 100px;
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 10px;
-  background-color: #ebecf0;
-  text-shadow: 1px 1px 0 #fff;
-  font: inherit;
-  color: #61677c;
-  box-shadow: -5px -5px 20px #fff, 5px 5px 20px #babecc;
-  transition: all 0.2s ease-in-out;
+#datetime-picker {
+  display: inline-block;
+  padding: 10px;
+  font-size: 1em;
+  margin-right: 10px;
 }
-.nav-link:hover,
-.nav-link:focus {
-  box-shadow: -2px -2px 5px #fff, 2px 2px 5px #babecc;
+
+button[data-start] {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
-section {
-  padding: 20px;
+
+button[data-start]:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+button[data-start]:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Розташування таймера */
+.timer {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.value {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.label {
+  font-size: 0.75em;
+  color: #555;
+}
+
+/* Спливаюче вікно у верхньому правому куті */
+.iziToast-topRight {
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: auto;
+}
+
+/* Styles for the form */
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form label,
+.form fieldset {
+  margin-bottom: 10px;
+}
+
+.form input[type='number'],
+.form input[type='radio'] {
+  margin-right: 10px;
+}
+
+.form button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.form button:hover {
+  background-color: #218838;
+}
+
+/* Styles for toast notifications */
+.iziToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.timer {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.value {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.label {
+  font-size: 0.75em;
+  color: #555;
 }
